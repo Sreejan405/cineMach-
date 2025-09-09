@@ -1,11 +1,11 @@
 /** @type {import('next-sitemap').IConfig} */
-module.exports = {
+const config = {
   siteUrl: 'https://cine-mach.vercel.app',
   generateRobotsTxt: true,
   sitemapSize: 5000,
+  outDir: './public',   // ✅ put sitemap + robots.txt inside public/
   changefreq: 'weekly',
   priority: 0.7,
-  outDir: './public',
   exclude: ['/api/*', '/_next/*'],
   robotsTxtOptions: {
     policies: [
@@ -21,3 +21,4 @@ module.exports = {
   },
 };
 
+export default config;
