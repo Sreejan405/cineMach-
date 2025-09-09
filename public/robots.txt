@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /_next/*
+
+# Host
+Host: https://cine-mach.vercel.app
+
+# Sitemaps
+Sitemap: https://cine-mach.vercel.app/sitemap.xml
