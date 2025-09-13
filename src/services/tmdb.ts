@@ -1,5 +1,5 @@
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_API_KEY = process.env.TMDB_API_KEY;// const link_1 = process.env.link_1
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
 export interface Movie {
