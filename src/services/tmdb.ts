@@ -1,5 +1,5 @@
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY;// const link_1 = process.env.link_1
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
 export interface Movie {
@@ -59,14 +59,26 @@ export async function discoverMovies(params: DiscoverMoviesParams = {}): Promise
     }
   }
 
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
-  if (!res.ok) {
-    console.error(`TMDB API error: ${res.statusText}`);
-    return [];
-  }
+  try {
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+    if (!res.ok) {
+      const errorBody = await res.text();
+      throw new Error(`TMDB API error: ${res.statusText}. Body: ${errorBody}`);
+    }
 
-  const data = await res.json();
-  return data.results || [];
+    const data = await res.json();
+    return data.results || [];
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }
 
 interface SearchMoviesParams {
@@ -99,14 +111,26 @@ export async function searchMovies(query?: string, params: SearchMoviesParams = 
     }
   }
   
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
-  if (!res.ok) {
-    console.error(`TMDB API error: ${res.statusText}`);
-    return [];
-  }
+  try {
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+    if (!res.ok) {
+      const errorBody = await res.text();
+      throw new Error(`TMDB API error: ${res.statusText}. Body: ${errorBody}`);
+    }
 
-  const data = await res.json();
-  return data.results || [];
+    const data = await res.json();
+    return data.results || [];
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }
 
 export interface MovieDetails extends Movie {
@@ -121,14 +145,26 @@ export async function getMovieDetails(movieId: number): Promise<MovieDetails | n
   const url = new URL(`${TMDB_API_URL}/movie/${movieId}`);
   url.searchParams.append('api_key', TMDB_API_KEY);
   
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
-  if (!res.ok) {
-    console.error(`TMDB API error for movie details: ${res.statusText}`);
-    return null;
-  }
+  try {
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+    if (!res.ok) {
+      const errorBody = await res.text();
+      throw new Error(`TMDB API error for movie details: ${res.statusText}. Body: ${errorBody}`);
+    }
 
-  const data = await res.json();
-  return data;
+    const data = await res.json();
+    return data;
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }
 
 
@@ -140,13 +176,25 @@ export async function getMovieVideos(movieId: number): Promise<Video[]> {
     const url = new URL(`${TMDB_API_URL}/movie/${movieId}/videos`);
     url.searchParams.append('api_key', TMDB_API_KEY);
 
-    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
-    if (!res.ok) {
-        console.error(`TMDB API error for movie videos: ${res.statusText}`);
-        return [];
+    try {
+        const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+        if (!res.ok) {
+            const errorBody = await res.text();
+            throw new Error(`TMDB API error for movie videos: ${res.statusText}. Body: ${errorBody}`);
+        }
+        const data = await res.json();
+        return data.results || [];
+    } catch (error: any) {
+        console.error("FULL SERVER ERROR 👉", error);
+        console.error("MESSAGE 👉", error?.message);
+        console.error("STACK 👉", error?.stack);
+
+        throw new Error(
+            typeof error === "string"
+            ? error
+            : error?.message || "Unknown server error"
+        );
     }
-    const data = await res.json();
-    return data.results || [];
 }
 
 
@@ -159,14 +207,26 @@ export async function getSimilarMovies(movieId: number): Promise<Movie[]> {
   url.searchParams.append('api_key', TMDB_API_KEY);
   url.searchParams.append('page', '1');
 
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
-  if (!res.ok) {
-    console.error(`TMDB API error for similar movies: ${res.statusText}`);
-    return [];
-  }
+  try {
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+    if (!res.ok) {
+      const errorBody = await res.text();
+      throw new Error(`TMDB API error for similar movies: ${res.statusText}. Body: ${errorBody}`);
+    }
 
-  const data = await res.json();
-  return data.results || [];
+    const data = await res.json();
+    return data.results || [];
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }
 
 
@@ -178,12 +238,24 @@ export async function getGenres(): Promise<Genre[]> {
   const url = new URL(`${TMDB_API_URL}/genre/movie/list`);
   url.searchParams.append('api_key', TMDB_API_KEY);
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
-    console.error(`TMDB API error: ${res.statusText}`);
-    return [];
-  }
+  try {
+    const res = await fetch(url.toString());
+    if (!res.ok) {
+      const errorBody = await res.text();
+      throw new Error(`TMDB API error: ${res.statusText}. Body: ${errorBody}`);
+    }
 
-  const data = await res.json();
-  return data.genres || [];
+    const data = await res.json();
+    return data.genres || [];
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }

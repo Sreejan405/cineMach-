@@ -1,7 +1,3 @@
-
-
-
-
 import Header from "@/components/Header";
 import Image from "next/image";
 import { Star, ExternalLink } from 'lucide-react';
@@ -10,7 +6,6 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MovieDetailClient } from "@/components/MovieDetailClient";
 import { Button } from "@/components/ui/button";
-
 
 interface MovieDetailPageProps {
   params: {
@@ -38,11 +33,10 @@ function SimilarMoviesSkeleton() {
   );
 }
 
-
-export default function MovieDetailPage({ params, searchParams }: MovieDetailPageProps) {
-  const title = decodeURIComponent(params.title);
-  const posterPath = searchParams.poster;
-  const rating = searchParams.rating ? parseFloat(searchParams.rating) : null;
+export default async function MovieDetailPage({ params: { title: encodedTitle }, searchParams: { poster, rating: ratingString } }: MovieDetailPageProps) {
+  const title = decodeURIComponent(encodedTitle);
+  const posterPath = poster;
+  const rating = ratingString ? parseFloat(ratingString) : null;
 
   const posterUrl = posterPath && posterPath !== 'null'
     ? `https://image.tmdb.org/t/p/w500${posterPath}`

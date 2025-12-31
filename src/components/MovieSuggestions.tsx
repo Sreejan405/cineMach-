@@ -21,7 +21,7 @@ const genres = [
   "Action", "Adventure", "Animation", "Comedy", "Crime",
   "Documentary", "Drama", "Family", "Fantasy", "History",
   "Horror", "Music", "Mystery", "Romance", "Science Fiction",
-  "TV Movie", "Thriller", "War", "Western", "Tragedy"
+  "TV Movie", "Thriller", "Tragedy", "War", "Western"
 ];
 
 const languages = [
@@ -43,6 +43,8 @@ const languages = [
     { code: 'te', name: 'Telugu' },
 ];
 
+const ottProviders = ["Netflix", "Amazon Prime Video", "Disney+ Hotstar", "SonyLIV", "Zee5"];
+
 export default function MovieSuggestions() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<Movie[] | null>(null);
@@ -51,6 +53,7 @@ export default function MovieSuggestions() {
   const [language, setLanguage] = useState<string>('en');
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [selectedOTTs, setSelectedOTTs] = useState<string[]>([]);
   const currentYear = new Date().getFullYear();
 
   const handleGenreChange = (genre: string) => {
@@ -58,6 +61,14 @@ export default function MovieSuggestions() {
       prev.includes(genre)
         ? prev.filter((item) => item !== genre)
         : [...prev, genre]
+    );
+  };
+
+  const toggleOTT = (ott: string) => {
+    setSelectedOTTs(prev =>
+      prev.includes(ott)
+        ? prev.filter(o => o !== ott)
+        : [...prev, ott]
     );
   };
 
@@ -79,6 +90,7 @@ export default function MovieSuggestions() {
         language,
         startDate: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
         endDate: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
+        otts: selectedOTTs
       });
       if (result.suggestions && result.suggestions.length > 0) {
         setSuggestions(result.suggestions as Movie[]);
@@ -115,6 +127,26 @@ export default function MovieSuggestions() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Label className="text-lg font-headline mb-4 block">Available on</Label>
+              <div className="flex flex-wrap gap-2">
+                {ottProviders.map(ott => (
+                  <button
+                    key={ott}
+                    type="button"
+                    onClick={() => toggleOTT(ott)}
+                    className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                      selectedOTTs.includes(ott)
+                        ? "bg-accent text-white border-accent"
+                        : "bg-transparent hover:bg-accent/10"
+                    }`}
+                  >
+                    {ott}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <Label className="text-lg font-headline mb-4 block">Select Genres</Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -170,7 +202,7 @@ export default function MovieSuggestions() {
                             initialFocus
                             fromYear={1900}
                             toYear={currentYear}
-                            captionLayout="dropdown-buttons"
+                            captionLayout="dropdown"
                         />
                         </PopoverContent>
                     </Popover>
@@ -195,7 +227,7 @@ export default function MovieSuggestions() {
                             initialFocus
                             fromYear={1900}
                             toYear={currentYear}
-                            captionLayout="dropdown-buttons"
+                            captionLayout="dropdown"
                         />
                         </PopoverContent>
                     </Popover>
@@ -230,7 +262,7 @@ export default function MovieSuggestions() {
                 <h2 className="text-3xl font-headline text-center font-bold">Your AI Recommendations</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {suggestions.map((movie, index) => (
-                    <MovieCard key={`${movie.title}-${index}`} movie={movie} />
+                    <MovieCard key={`${movie.id}-${index}`} movie={movie} />
                   ))}
                 </div>
               </>

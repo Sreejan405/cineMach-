@@ -19,16 +19,28 @@ export type SimilarMoviesOutput = z.infer<typeof SimilarMoviesOutputSchema>;
 
 
 export async function getSimilarMovies(input: SimilarMoviesInput): Promise<Movie[]> {
-  const similarMoviesList = await similarMoviesFlow(input);
-  if (!similarMoviesList || similarMoviesList.titles.length === 0) {
-    return [];
+  try {
+    const similarMoviesList = await similarMoviesFlow(input);
+    if (!similarMoviesList || similarMoviesList.titles.length === 0) {
+      return [];
+    }
+    
+    const moviePromises = similarMoviesList.titles.map(title => searchMovies(title));
+    const moviesData = await Promise.all(moviePromises);
+    
+    // Return the first result for each search, filtering out empty results
+    return moviesData.map(movieArray => movieArray[0]).filter(Boolean);
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
   }
-  
-  const moviePromises = similarMoviesList.titles.map(title => searchMovies(title));
-  const moviesData = await Promise.all(moviePromises);
-  
-  // Return the first result for each search, filtering out empty results
-  return moviesData.map(movieArray => movieArray[0]).filter(Boolean);
 }
 
 const prompt = ai.definePrompt({

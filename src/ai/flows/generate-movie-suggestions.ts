@@ -45,14 +45,26 @@ export async function getMoviesByGenre(input: GenerateMovieSuggestionsInput): Pr
     .filter(g => g !== 'Tragedy')
     .map(genre => genreMap[genre as keyof typeof genreMap]);
 
-  const movies: Movie[] = await discoverMovies({
-    with_genres: genreIds.join(','),
-    with_original_language: input.language,
-    "primary_release_date.gte": input.startDate,
-    "primary_release_date.lte": input.endDate,
-  });
+  try {
+    const movies: Movie[] = await discoverMovies({
+      with_genres: genreIds.join(','),
+      with_original_language: input.language,
+      "primary_release_date.gte": input.startDate,
+      "primary_release_date.lte": input.endDate,
+    });
 
-  return {
-    suggestions: movies,
-  };
+    return {
+      suggestions: movies,
+    };
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }

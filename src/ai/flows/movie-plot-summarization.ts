@@ -22,19 +22,26 @@ const SummarizeMoviePlotOutputSchema = z.object({
 export type SummarizeMoviePlotOutput = z.infer<typeof SummarizeMoviePlotOutputSchema>;
 
 export async function summarizeMoviePlot(input: SummarizeMoviePlotInput): Promise<SummarizeMoviePlotOutput> {
-  return summarizeMoviePlotFlow(input);
+  try {
+    return await summarizeMoviePlotFlow(input);
+  } catch (error: any) {
+    console.error("FULL SERVER ERROR 👉", error);
+    console.error("MESSAGE 👉", error?.message);
+    console.error("STACK 👉", error?.stack);
+
+    throw new Error(
+      typeof error === "string"
+        ? error
+        : error?.message || "Unknown server error"
+    );
+  }
 }
 
 const prompt = ai.definePrompt({
   name: 'summarizeMoviePlotPrompt',
   input: {schema: SummarizeMoviePlotInputSchema},
   output: {schema: SummarizeMoviePlotOutputSchema},
-  prompt: `You are an AI that summarizes movie plots.
-
-  Summarize the following movie plot in a concise manner.
-
-  Movie Title: {{{title}}}
-  Movie Plot: {{{moviePlot}}}`,
+  prompt: `You are an AI that summarizes movie plots.\n\n  Summarize the following movie plot in a concise manner.\n\n  Movie Title: {{{title}}}\n  Movie Plot: {{{moviePlot}}}`,
 });
 
 const summarizeMoviePlotFlow = ai.defineFlow(

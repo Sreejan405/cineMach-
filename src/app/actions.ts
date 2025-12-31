@@ -8,8 +8,9 @@ import { getTragicMovies } from '@/ai/flows/generate-tragic-movies';
 
 
 export async function handleGetSuggestions(input: GenerateMovieSuggestionsInput): Promise<GenerateMovieSuggestionsOutput> {
+  const { otts, ...safeInput } = input;
 
-  if (input.genres.includes('Recently Released')) {
+  if (safeInput.genres.includes('Recently Released')) {
     const movies = await searchMovies(undefined, {
       "primary_release_date.gte": new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().split('T')[0],
       "primary_release_date.lte": new Date().toISOString().split('T')[0],
@@ -17,12 +18,12 @@ export async function handleGetSuggestions(input: GenerateMovieSuggestionsInput)
     return { suggestions: movies.slice(0,10) };
   }
   
-  if (input.genres.includes('Tragedy')) {
-    const tragicMovieTitles = await getTragicMovies({ language: input.language });
+  if (safeInput.genres.includes('Tragedy')) {
+    const tragicMovieTitles = await getTragicMovies({ language: safeInput.language });
     
-    if (input.genres.length > 1) {
-        const otherGenres = input.genres.filter(g => g !== 'Tragedy');
-        const genreMovies = await getMoviesByGenre({ ...input, genres: otherGenres });
+    if (safeInput.genres.length > 1) {
+        const otherGenres = safeInput.genres.filter(g => g !== 'Tragedy');
+        const genreMovies = await getMoviesByGenre({ ...safeInput, genres: otherGenres } as GenerateMovieSuggestionsInput);
         
         const tragicTitlesLower = tragicMovieTitles.map(t => t.toLowerCase());
         const filteredSuggestions = genreMovies.suggestions.filter(movie => 
@@ -34,13 +35,13 @@ export async function handleGetSuggestions(input: GenerateMovieSuggestionsInput)
         }
     }
 
-    const moviePromises = tragicMovieTitles.map(title => searchMovies(title, {language: input.language}));
+    const moviePromises = tragicMovieTitles.map(title => searchMovies(title, {language: safeInput.language}));
     const moviesData = await Promise.all(moviePromises);
     const suggestions = moviesData.map(movieArray => movieArray[0]).filter(Boolean);
     return { suggestions };
   }
 
-  const suggestions = await getMoviesByGenre(input);
+  const suggestions = await getMoviesByGenre(safeInput as GenerateMovieSuggestionsInput);
   
   return suggestions;
 }
