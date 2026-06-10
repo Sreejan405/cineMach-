@@ -118,27 +118,31 @@ export default function MovieSuggestions() {
 
   return (
     <div className="space-y-12">
-      <Card className="max-w-4xl mx-auto shadow-lg">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl md:text-4xl font-headline font-bold mb-2">Find Your Next Movie</h2>
+        <p className="text-muted-foreground">Filter by genre, language, and era — we&apos;ll handle the rest.</p>
+      </div>
+      <Card className="max-w-4xl mx-auto shadow-lg border-border/60">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline flex items-center gap-2">
-            <Film className="h-6 w-6 text-accent" />
-            Find Your Next Movie
+          <CardTitle className="text-xl font-headline flex items-center gap-2">
+            <Film className="h-5 w-5 text-accent" />
+            Preferences
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label className="text-lg font-headline mb-4 block">Available on</Label>
+              <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3 block">Available on</Label>
               <div className="flex flex-wrap gap-2">
                 {ottProviders.map(ott => (
                   <button
                     key={ott}
                     type="button"
                     onClick={() => toggleOTT(ott)}
-                    className={`px-4 py-2 rounded-full border text-sm transition-colors ${
+                    className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-all duration-150 ${
                       selectedOTTs.includes(ott)
-                        ? "bg-accent text-white border-accent"
-                        : "bg-transparent hover:bg-accent/10"
+                        ? "bg-accent text-white border-accent shadow-md shadow-purple-900/20"
+                        : "bg-transparent hover:bg-accent/10 border-border"
                     }`}
                   >
                     {ott}
@@ -148,7 +152,7 @@ export default function MovieSuggestions() {
             </div>
 
             <div>
-              <Label className="text-lg font-headline mb-4 block">Select Genres</Label>
+              <Label className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3 block">Select Genres</Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {genres.map((genre) => (
                   <div key={genre} className="flex items-center space-x-2">
@@ -234,14 +238,19 @@ export default function MovieSuggestions() {
                 </div>
             </div>
             
-            <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-purple-900/30"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
+                  Finding your matches...
                 </>
               ) : (
-                'Get Movie Suggestions'
+                'Get My Movie Suggestions'
               )}
             </Button>
           </form>

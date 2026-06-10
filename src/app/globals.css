@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
     --background: 240 67% 94%;
@@ -84,5 +80,62 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    scroll-behavior: smooth;
   }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent) / 0.5);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent) / 0.8);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Cinematic hero background */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(275 20% 8%),
+    hsl(282 60% 15%),
+    hsl(275 20% 8%),
+    hsl(260 40% 12%)
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Floating orb effect */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.float-orb {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Card hover glow */
+.movie-card-glow:hover {
+  box-shadow: 0 0 30px hsl(var(--accent) / 0.3), 0 20px 60px rgba(0,0,0,0.5);
 }

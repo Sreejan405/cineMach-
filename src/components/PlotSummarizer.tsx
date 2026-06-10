@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Wand2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 
-const defaultPlot = "In a futuristic city, a lone detective uncovers a vast conspiracy that threatens to unravel the fabric of society. He must navigate a world of advanced technology, corporate espionage, and artificial intelligence to find the truth. Along the way, he partners with a renegade android, who questions the very nature of humanity. Together, they face off against a powerful corporation with a sinister plan, leading to a climactic showdown that will determine the fate of both humans and machines.";
 
 export interface SummaryResult {
   summary: string;
@@ -21,7 +20,7 @@ interface PlotSummarizerProps {
 }
 
 export default function PlotSummarizer({ title }: PlotSummarizerProps) {
-  const [plot, setPlot] = useState(defaultPlot);
+  const [plot, setPlot] = useState("");
   const [result, setResult] = useState<SummaryResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();

@@ -6,9 +6,9 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
-  };
+  }>;
 }
 
 async function SearchResults({ query }: { query: string }) {
@@ -44,7 +44,8 @@ function SearchSkeleton() {
     );
 }
 
-export default function SearchPage({ searchParams }: SearchPageProps) {
+export default async function SearchPage(props: SearchPageProps) {
+  const searchParams = await props.searchParams;
   const query = searchParams.q || "";
 
   return (
