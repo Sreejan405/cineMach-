@@ -7,6 +7,8 @@ import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 function RecentReleasesSkeleton() {
     return (
         <section className="container mx-auto px-4 py-16">
