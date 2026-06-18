@@ -6,6 +6,7 @@ import { summarizeMoviePlot, SummarizeMoviePlotInput, SummarizeMoviePlotOutput }
 import { getMovieDetails, discoverMovies, searchMovies, Movie, Genre, getMovieVideos } from '@/services/tmdb';
 import { getTragicMovies } from '@/ai/flows/generate-tragic-movies';
 import { getMoodMovies, MoodAnswers, MoodMoviesOutput } from '@/ai/flows/generate-mood-movies';
+import { getMoviesByDescription, DescriptionInput, DescriptionMoviesOutput } from '@/ai/flows/generate-description-movies';
 
 
 export async function handleGetSuggestions(input: GenerateMovieSuggestionsInput): Promise<GenerateMovieSuggestionsOutput> {
@@ -128,5 +129,14 @@ export async function handleMoodMovies(answers: MoodAnswers): Promise<MoodMovies
   } catch (error) {
     console.error('Error in handleMoodMovies:', error);
     return { movies: [], genres: [] };
+  }
+}
+
+export async function handleDescriptionMovies(input: DescriptionInput): Promise<DescriptionMoviesOutput> {
+  try {
+    return await getMoviesByDescription(input);
+  } catch (error) {
+    console.error('Error in handleDescriptionMovies:', error);
+    return { movies: [], genres: [], reasoning: '' };
   }
 }
