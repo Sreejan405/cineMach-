@@ -3,6 +3,7 @@ import MovieSuggestions from '@/components/MovieSuggestions';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, Film, Zap } from 'lucide-react';
 import RecentlyReleased from '@/components/RecentlyReleased';
+import MoodQuestionnaire from '@/components/MoodQuestionnaire';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
@@ -111,6 +112,11 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── Mood Questionnaire ── */}
+        <div className="border-t border-white/5">
+          <MoodQuestionnaire />
+        </div>
 
         {/* ── Recently Released ── */}
         <Suspense fallback={<RecentReleasesSkeleton />}>

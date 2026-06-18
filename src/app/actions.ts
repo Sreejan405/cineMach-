@@ -5,6 +5,7 @@ import { getMoviesByGenre, GenerateMovieSuggestionsInput, GenerateMovieSuggestio
 import { summarizeMoviePlot, SummarizeMoviePlotInput, SummarizeMoviePlotOutput } from '@/ai/flows/movie-plot-summarization';
 import { getMovieDetails, discoverMovies, searchMovies, Movie, Genre, getMovieVideos } from '@/services/tmdb';
 import { getTragicMovies } from '@/ai/flows/generate-tragic-movies';
+import { getMoodMovies, MoodAnswers, MoodMoviesOutput } from '@/ai/flows/generate-mood-movies';
 
 
 export async function handleGetSuggestions(input: GenerateMovieSuggestionsInput): Promise<GenerateMovieSuggestionsOutput> {
@@ -118,5 +119,14 @@ export async function handleGetTrailer(title: string): Promise<string | null> {
   } catch (error) {
     console.error("Error fetching trailer URL:", error);
     return `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' trailer')}`;
+  }
+}
+
+export async function handleMoodMovies(answers: MoodAnswers): Promise<MoodMoviesOutput> {
+  try {
+    return await getMoodMovies(answers);
+  } catch (error) {
+    console.error('Error in handleMoodMovies:', error);
+    return { movies: [], genres: [] };
   }
 }

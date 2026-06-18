@@ -39,6 +39,8 @@ interface DiscoverMoviesParams {
   'primary_release_date.lte'?: string;
   with_original_language?: string;
   sort_by?: string;
+  'vote_average.gte'?: string;
+  'vote_count.gte'?: string;
 }
 
 async function tmdbFetch(url: URL): Promise<any> {
