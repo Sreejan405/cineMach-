@@ -56,7 +56,7 @@ export default async function MovieDetailPage(props: MovieDetailPageProps) {
   const searchParams = await props.searchParams;
   
   const title = decodeURIComponent(params.title);
-  const posterPath = searchParams.poster;
+  let posterPath = searchParams.poster;
   const ratingString = searchParams.rating;
   const rating = ratingString ? parseFloat(ratingString) : null;
   const overview = searchParams.overview ? decodeURIComponent(searchParams.overview) : null;
@@ -72,8 +72,14 @@ export default async function MovieDetailPage(props: MovieDetailPageProps) {
 
     if (searchRes.ok) {
       const searchData = await searchRes.json();
-      movieId = searchData.results?.[0]?.id ?? null;
+      const firstResult = searchData.results?.[0];
+      movieId = firstResult?.id ?? null;
       console.log("Movie ID found:", movieId);
+
+      // Use TMDB poster if none was passed via URL
+      if (!posterPath && firstResult?.poster_path) {
+        posterPath = firstResult.poster_path;
+      }
     } else {
       console.error("TMDB search failed with status:", searchRes.status, await searchRes.text());
     }
