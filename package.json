@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev -p 9003",
+        "dev": "next dev -p 3000",
         "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
         "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
         "build": "next build",
@@ -56,8 +56,6 @@
         "zustand": "^4.5.4"
     },
     "devDependencies": {
-        "@genkit-ai/firebase": "^0.5.17",
-        "@genkit-ai/googleai": "^0.5.17",
         "@genkit-ai/next": "^1.37.0",
         "@opentelemetry/exporter-jaeger": "^2.1.0",
         "@types/node": "^20",

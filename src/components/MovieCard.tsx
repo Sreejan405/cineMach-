@@ -5,7 +5,11 @@ import { Star, Calendar } from 'lucide-react';
 import type { Movie } from '@/services/tmdb';
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: Movie & {
+    score?: number;
+    summary?: string;
+    reasons?: string[];
+  };
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
@@ -52,7 +56,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-3 space-y-1">
+        <div className="p-3 space-y-1.5">
           <h3
             className="font-semibold text-sm leading-tight w-full truncate group-hover:text-accent transition-colors"
             title={movie.title}
@@ -67,6 +71,32 @@ export default function MovieCard({ movie }: MovieCardProps) {
               </>
             )}
           </div>
+
+          {movie.score !== undefined && movie.score > 0 && (
+            <div className="inline-flex items-center gap-1 rounded bg-fuchsia-500/10 border border-fuchsia-500/25 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-400">
+              Match Score: {movie.score}%
+            </div>
+          )}
+
+          {movie.summary && (
+            <p className="text-[11px] text-white/60 leading-snug line-clamp-2 italic pt-1">
+              "{movie.summary}"
+            </p>
+          )}
+
+          {movie.reasons && movie.reasons.length > 0 && (
+            <div className="pt-2 border-t border-white/5 space-y-1">
+              <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Why this movie?</p>
+              <ul className="space-y-0.5">
+                {movie.reasons.map((reason, idx) => (
+                  <li key={idx} className="text-[11px] text-white/85 flex items-start gap-1 leading-normal">
+                    <span className="text-emerald-400 shrink-0 select-none">✓</span>
+                    <span>{reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </Link>

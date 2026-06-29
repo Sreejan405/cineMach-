@@ -30,6 +30,7 @@ export interface GenerateMovieSuggestionsInput {
   language?: string;
   startDate?: string;
   endDate?: string;
+  otts?: string[];
 }
 
 export interface GenerateMovieSuggestionsOutput {

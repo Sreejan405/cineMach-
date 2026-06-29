@@ -5,5 +5,7 @@ import '@/ai/flows/movie-plot-summarization.ts';
 import '@/ai/flows/generate-movie-suggestions.ts';
 import '@/ai/flows/generate-similar-movies.ts';
 import '@/ai/flows/generate-tragic-movies.ts';
+import '@/ai/flows/analyze-user-situation.ts';
+import '@/ai/flows/rank-movies.ts';
 
 

@@ -9,10 +9,12 @@ import { handleDescriptionMovies } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import {
   Loader2, Smile, Zap, Palette, ArrowRight, ArrowLeft,
-  RefreshCw, MessageSquare, ListChecks, Sparkles, Send
+  RefreshCw, MessageSquare, ListChecks, Sparkles, Send, Brain
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Movie } from '@/services/tmdb';
+import { SituationAnalysis } from '@/ai/flows/analyze-user-situation';
+import AnalysisSummary from './AnalysisSummary';
 
 // ─── Question Definitions ───────────────────────────────────────────────────
 
@@ -64,15 +66,18 @@ function ResultsPanel({
   movies,
   genres,
   reasoning,
+  analysis,
   onReset,
 }: {
   movies: Movie[];
   genres: string[];
   reasoning?: string;
+  analysis?: SituationAnalysis;
   onReset: () => void;
 }) {
   return (
     <>
+      {analysis && <AnalysisSummary analysis={analysis} />}
       {/* Result header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -160,10 +165,32 @@ export default function MoodQuestionnaire() {
   const [descMovies, setDescMovies] = useState<Movie[]>([]);
   const [descGenres, setDescGenres] = useState<string[]>([]);
   const [descReasoning, setDescReasoning] = useState('');
+  const [descAnalysis, setDescAnalysis] = useState<SituationAnalysis | null>(null);
   const [descLoading, setDescLoading] = useState(false);
   const [descDone, setDescDone] = useState(false);
 
   const { toast } = useToast();
+
+  const quickSuggestions = [
+    { label: '😴 Exhausted after work', text: "I had a long day at work. I'm exhausted. I just want something relaxing. I prefer Hindi movies." },
+    { label: '❤️ Date night', text: "It's date night. We want a romantic, engaging movie to watch together, maybe a rom-com or an emotional drama." },
+    { label: '👨‍👩‍👧 Family movie night', text: "We're having a family movie night. Looking for a wholesome, entertaining family or animation movie that everyone can enjoy." },
+    { label: '😂 Need a comedy', text: "I'm in the mood for a good laugh! Recommend a hilarious comedy or a feel-good, light-hearted film." },
+    { label: '😭 Want to cry', text: "I want an emotional tear-jerker. A deeply moving, tragic, or bittersweet drama that will make me cry." },
+    { label: '🚀 Mind-bending sci-fi', text: "Give me something completely mind-bending. A sci-fi or mystery thriller with high stakes and a puzzle plot." },
+    { label: '💪 Need motivation', text: "I need some motivation. Show me an inspiring, uplifting story of triumph, personal growth, or historical significance." },
+    { label: '🎓 Student stress', text: "I'm stressed out from studying. I need an easy, low-stress, fun movie to decompress and clear my mind." }
+  ];
+
+  const handleQuickSuggestion = (text: string) => {
+    setDescription(text);
+    setTimeout(() => {
+      const textarea = document.getElementById('mood-description');
+      if (textarea) {
+        textarea.focus();
+      }
+    }, 50);
+  };
   const currentQ = questions[step];
 
   // ── Quiz handlers ──────────────────────────────────────────────────────────
@@ -220,6 +247,9 @@ export default function MoodQuestionnaire() {
       setDescMovies(result.movies);
       setDescGenres(result.genres);
       setDescReasoning(result.reasoning);
+      if (result.analysis) {
+        setDescAnalysis(result.analysis);
+      }
     } catch {
       toast({ title: 'Error', description: 'AI could not process your description. Try again.', variant: 'destructive' });
       setDescMovies([]);
@@ -233,6 +263,7 @@ export default function MoodQuestionnaire() {
     setDescMovies([]);
     setDescGenres([]);
     setDescReasoning('');
+    setDescAnalysis(null);
     setDescDone(false);
   };
 
@@ -432,7 +463,7 @@ export default function MoodQuestionnaire() {
                         <Sparkles className="h-5 w-5" />
                       </div>
                       <h3 className="text-xl font-headline font-bold text-white">
-                        Describe your situation
+                        🎬 Tell us about your movie night
                       </h3>
                     </div>
                     <p className="text-sm text-muted-foreground mb-6 ml-13">
@@ -450,7 +481,7 @@ export default function MoodQuestionnaire() {
                         }}
                         rows={5}
                         maxLength={500}
-                        placeholder={`e.g. "I just got back from a long trip and I'm feeling nostalgic. I want something emotional but not too dark — maybe a feel-good drama or a romantic film set in a beautiful location."`}
+                        placeholder={`e.g. "I had a long day at work. I'm exhausted. I just want something relaxing. I prefer Hindi movies."`}
                         className="w-full resize-none rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/30 text-sm p-4 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/60 transition-all duration-200 leading-relaxed"
                       />
                       <span className="absolute bottom-3 right-3 text-xs text-white/30 select-none">
@@ -458,23 +489,18 @@ export default function MoodQuestionnaire() {
                       </span>
                     </div>
 
-                    {/* Example pills */}
+                    {/* Quick Suggestions */}
                     <div className="mt-4 mb-6">
-                      <p className="text-xs text-white/30 mb-2">Try an example:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          'Cozy night in, something funny',
-                          'Mind-bending thriller for a rainy day',
-                          'Heart-warming family movie',
-                          'Epic sci-fi adventure',
-                          'Sad but beautiful love story',
-                        ].map(ex => (
+                      <p className="text-xs text-white/40 mb-2 font-medium">Quick Suggestions:</p>
+                      <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
+                        {quickSuggestions.map(sug => (
                           <button
-                            key={ex}
-                            onClick={() => setDescription(ex)}
-                            className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-white/50 hover:text-white hover:border-fuchsia-500/40 hover:bg-fuchsia-500/10 transition-all duration-150"
+                            key={sug.label}
+                            type="button"
+                            onClick={() => handleQuickSuggestion(sug.text)}
+                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-white/60 hover:text-white hover:border-fuchsia-500/40 hover:bg-fuchsia-500/10 transition-all duration-150"
                           >
-                            {ex}
+                            {sug.label}
                           </button>
                         ))}
                       </div>
@@ -516,6 +542,7 @@ export default function MoodQuestionnaire() {
                         movies={descMovies}
                         genres={descGenres}
                         reasoning={descReasoning}
+                        analysis={descAnalysis || undefined}
                         onReset={resetDescribe}
                       />
                     )}
