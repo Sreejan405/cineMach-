@@ -8,7 +8,6 @@ import { getTragicMovies } from '@/ai/flows/generate-tragic-movies';
 import { getMoodMovies, MoodAnswers, MoodMoviesOutput } from '@/ai/flows/generate-mood-movies';
 import { DescriptionInput } from '@/ai/flows/generate-description-movies';
 import { analyzeUserSituationFlow, SituationAnalysis } from '@/ai/flows/analyze-user-situation';
-import { rankMoviesFlow } from '@/ai/flows/rank-movies';
 import { normalizeGenres } from '@/lib/genre-normalizer';
 
 export interface RankedMovie extends Movie {
@@ -169,8 +168,37 @@ export async function handleDescriptionMovies(input: DescriptionInput): Promise<
 
     // Step 1: Analyze situation
     console.log("Step 1: Analyzing user situation with Genkit...");
-    const analysis: SituationAnalysis = await analyzeUserSituationFlow({ situation: rawDescription });
-    console.log("Analysis Output:", JSON.stringify(analysis, null, 2));
+    let analysis: SituationAnalysis;
+    try {
+      analysis = await analyzeUserSituationFlow({ situation: rawDescription });
+      console.log("Analysis Output:", JSON.stringify(analysis, null, 2));
+    } catch (error) {
+      console.warn("AI Situation Analysis failed (likely quota). Using fallback keyword mapping.", error);
+      // Fallback keyword mapping
+      const lowerDesc = rawDescription.toLowerCase();
+      const fallbackGenres = [];
+      if (lowerDesc.includes('action') || lowerDesc.includes('fight') || lowerDesc.includes('explosion')) fallbackGenres.push('Action');
+      if (lowerDesc.includes('comedy') || lowerDesc.includes('laugh') || lowerDesc.includes('funny')) fallbackGenres.push('Comedy');
+      if (lowerDesc.includes('drama') || lowerDesc.includes('sad') || lowerDesc.includes('emotional')) fallbackGenres.push('Drama');
+      if (lowerDesc.includes('horror') || lowerDesc.includes('scary') || lowerDesc.includes('fear')) fallbackGenres.push('Horror');
+      if (lowerDesc.includes('romance') || lowerDesc.includes('love')) fallbackGenres.push('Romance');
+      if (lowerDesc.includes('sci-fi') || lowerDesc.includes('space') || lowerDesc.includes('science fiction')) fallbackGenres.push('Science Fiction');
+      if (lowerDesc.includes('thriller') || lowerDesc.includes('suspense')) fallbackGenres.push('Thriller');
+      if (lowerDesc.includes('family') || lowerDesc.includes('kids')) fallbackGenres.push('Family');
+      if (lowerDesc.includes('adventure') || lowerDesc.includes('journey')) fallbackGenres.push('Adventure');
+      if (lowerDesc.includes('crime') || lowerDesc.includes('murder')) fallbackGenres.push('Crime');
+
+      analysis = {
+        languageCode: null,
+        mood: 'Unknown',
+        energy: 'medium',
+        context: 'Unknown',
+        genres: fallbackGenres,
+        keywords: [rawDescription],
+        avoid: [],
+        confidence: 0.5
+      };
+    }
 
     // Step 2: Normalize genres
     console.log("Step 2: Normalizing genres...");
@@ -259,41 +287,23 @@ export async function handleDescriptionMovies(input: DescriptionInput): Promise<
       return { movies: [], genres: normalizedGenres, reasoning: 'No movies found.', analysis };
     }
 
-    // Slice to 12 candidates to prevent blowing up model context limits
+    // Slice to 12 candidates
     const candidates = movies.slice(0, 12);
-    console.log(`Found ${candidates.length} candidates. Formatting for re-ranking...`);
+    console.log(`Found ${candidates.length} candidates. Applying local ranking...`);
 
-    const getGenreNames = (ids: number[]): string[] => {
-      return ids.map(id => REVERSE_GENRE_MAP[id]).filter(Boolean);
-    };
-
-    const candidatePayload = candidates.map(m => ({
-      id: m.id,
-      title: m.title,
-      overview: m.overview || '',
-      genres: getGenreNames(m.genre_ids)
-    }));
-
-    // Step 5 & 6: AI Re-ranking
-    console.log("Step 5 & 6: Running AI Re-ranking flow...");
-    let rankedResults;
-    try {
-      rankedResults = await rankMoviesFlow({
-        userAnalysis: analysis,
-        situation: rawDescription,
-        candidateMovies: candidatePayload
-      });
-      console.log("AI Re-ranking complete. Results received:", rankedResults.length);
-    } catch (err) {
-      console.error("AI Re-ranking failed, applying baseline scores:", err);
-      // Fallback baseline ranking if Genkit fails
-      rankedResults = candidates.map((m, idx) => ({
+    // Step 5 & 6: Local Ranking (AI Re-ranking removed to save quota)
+    const rankedResults = candidates.map((m, idx) => {
+      const baseScore = 70;
+      const positionBonus = Math.max(0, 15 - idx);
+      const ratingBonus = m.vote_average ? Math.min(15, (m.vote_average - 6) * 3) : 0;
+      
+      return {
         movieId: m.id,
-        score: Math.max(90 - idx * 5, 50),
+        score: Math.round(baseScore + positionBonus + ratingBonus),
         summary: m.overview || '',
-        reasons: ['Popular suggestion', 'Matches similar themes']
-      }));
-    }
+        reasons: ['Popular suggestion matching your criteria']
+      };
+    });
 
     const rankMap = new Map(rankedResults.map(r => [r.movieId, r]));
 
